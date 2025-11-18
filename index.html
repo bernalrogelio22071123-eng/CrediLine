@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>CrediLine — Ultra Futurista</title>
+
+<!-- Fuente -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Orbitron:wght@600;800&display=swap" rel="stylesheet">
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+/* ==================================================================
+   CrediLine - Ultra Futurista Sci-Fi (Turquesa + Morado)
+   - Responsive
+   - Parallax + tilt + animated background
+   ================================================================== */
+
+/* VARIABLES */
+:root{
+  --bg1: #030510;
+  --bg2: #071022;
+  --turq: #06e6d6;     /* turquoise accent */
+  --purple: #7c3aed;   /* purple accent */
+  --glass: rgba(255,255,255,0.04);
+  --glass-2: rgba(255,255,255,0.02);
+  --muted: #9fc9d7;
+  --card-w: 360px;
+  --card-h: 220px;
+  --radius: 14px;
+  --ease: cubic-bezier(.2,.9,.2,1);
+}
+
+/* RESET */
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,Arial;color:#eaf7fb;background:
+  radial-gradient(800px 400px at 10% 10%, rgba(6,230,214,0.04), transparent 12%),
+  radial-gradient(900px 500px at 90% 80%, rgba(124,58,237,0.03), transparent 8%),
+  linear-gradient(180deg,var(--bg1),var(--bg2));-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
+
+/* PAGE LAYOUT */
+.container{max-width:1280px;margin:26px auto;padding:18px}
+.header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:14px}
+.brand .logo{
+  width:64px;height:64px;border-radius:12px;background:linear-gradient(135deg,var(--turq),var(--purple));
+  display:flex;align-items:center;justify-content:center;font-weight:800;color:#041323;font-family:Orbitron;font-size:20px;
+  box-shadow:0 12px 36px rgba(124,58,237,0.12), inset 0 -6px 18px rgba(255,255,255,0.06);
+}
+.title-wrap{display:flex;flex-direction:column}
+.title-main{font-family:Orbitron,Inter;font-size:34px;line-height:1;color:#fff;font-style:italic;letter-spacing:-1px;position:relative}
+.title-main .accent{background:linear-gradient(90deg,var(--turq),var(--purple));-webkit-background-clip:text;color:transparent;text-shadow:0 6px 18px rgba(6,230,214,0.06)}
+.title-drip{position:relative;display:inline-block}
+.title-drip::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  bottom:-14px;
+  width:12px;height:40px;border-radius:10px;
+  background:linear-gradient(180deg,var(--turq),var(--purple));
+  filter:blur(0.6px);
+  transform:translateX(-50%);
+  animation:drip 2.8s infinite ease-in-out;
+  opacity:0.95;
+}
+@keyframes drip{0%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(10px)}100%{transform:translateX(-50%) translateY(0)}}
+
+.header-sub{color:var(--muted);font-size:13px}
+
+/* GRID */
+.main-grid{display:grid;grid-template-columns:1fr 420px;gap:28px;margin-top:18px}
+@media (max-width:980px){ .main-grid{grid-template-columns:1fr} }
+
+/* LEFT: content (cards, graph, chat) */
+.left-col{display:flex;flex-direction:column;gap:16px}
+
+/* BACKGROUND HUD LINES (subtle) */
+.hud{
+  position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen;opacity:0.06;
+}
+.hud svg{width:100%;height:100%}
+
+/* CARDS ROW */
+.cards-row{display:flex;gap:18px;flex-wrap:wrap;justify-content:center}
+
+/* each card */
+.card{
+  width:var(--card-w);height:var(--card-h);border-radius:18px;position:relative;cursor:pointer;perspective:1200px;
+  transition:transform .35s var(--ease), box-shadow .35s;
+  will-change:transform;
+}
+.card:focus{outline:3px solid rgba(6,230,214,0.12);outline-offset:6px}
+.card .inner{
+  width:100%;height:100%;border-radius:14px;background:linear-gradient(135deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06));
+  box-shadow:0 18px 40px rgba(2,6,23,0.6), inset 0 -6px 40px rgba(255,255,255,0.02);
+  overflow:hidden;transform-style:preserve-3d;transition:transform .6s var(--ease);
+}
+.card .visual{height:130px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.03))}
+.card .visual img{width:100%;height:100%;object-fit:cover;border-radius:10px;transition:transform .45s var(--ease), filter .35s}
+.card .body{padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.card .chip{width:56px;height:38px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.2),rgba(255,255,255,0.06));display:flex;align-items:center;justify-content:center;font-weight:800;color:#041323}
+.card .title{font-weight:700}
+.card .meta{display:flex;justify-content:space-between;color:var(--muted);font-size:13px}
+.card .badge{position:absolute;right:12px;top:12px;padding:6px 12px;border-radius:999px;background:linear-gradient(90deg, rgba(0,0,0,0.25), rgba(255,255,255,0.02));border:1px solid rgba(255,255,255,0.06)}
+.card .desc{position:absolute;left:0;right:0;bottom:0;padding:14px;background:linear-gradient(180deg, transparent, rgba(0,0,0,0.7));color:#e8f8f6;opacity:0;transform:translateY(8px);transition:all .28s}
+.card:hover .desc{opacity:1;transform:translateY(0)}
+.card:hover .visual img{transform:scale(1.06);filter:brightness(1.03)}
+
+/* PARALLAX BASE (floating halo) */
+.card::before{
+  content:"";position:absolute;inset:-6px;border-radius:20px;background:linear-gradient(90deg, rgba(6,230,214,0.08), rgba(124,58,237,0.06));filter:blur(14px);opacity:0.55;z-index:-1;transition:opacity .35s;
+}
+.card:hover::before{opacity:1;filter:blur(22px)}
+
+/* RIGHT: Panel (glass) */
+.panel{
+  border-radius:16px;padding:22px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.04));
+  border:1px solid rgba(255,255,255,0.04);backdrop-filter:blur(8px);box-shadow:0 12px 40px rgba(6,230,214,0.03);
+}
+.panel h3{margin:0 0 8px 0;color:#eaf7fb}
+.panel p{color:var(--muted);font-size:13px}
+
+/* inputs */
+.label{display:block;margin-top:12px;color:var(--muted);font-size:13px}
+.input{width:100%;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--text);margin-top:8px}
+.row{display:flex;gap:8px}
+.btn{padding:12px;border-radius:12px;border:none;background:linear-gradient(90deg,var(--turq),var(--purple));color:#041216;font-weight:700;cursor:pointer;margin-top:12px;box-shadow:0 10px 30px rgba(124,58,237,0.08)}
+.btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--text)}
+
+/* canvas */
+#grafica{width:100%;height:300px;border-radius:12px;margin-top:14px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.02));box-shadow:inset 0 4px 18px rgba(0,0,0,0.4)}
+
+/* chat */
+.chat{margin-top:14px}
+.chat-log{height:200px;overflow:auto;padding:12px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.03));border:1px solid rgba(255,255,255,0.03)}
+.chat-row{display:flex;gap:8px;margin-bottom:8px}
+.msg{padding:8px 12px;border-radius:12px;max-width:78%;white-space:pre-wrap}
+.msg.user{margin-left:auto;background:linear-gradient(90deg, rgba(6,230,214,0.12), rgba(124,58,237,0.09));border:1px solid rgba(6,230,214,0.06)}
+.msg.bot{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.03)}
+
+/* footer small note */
+.note{margin-top:12px;color:var(--muted);font-size:13px;text-align:center}
+
+/* responsiveness for phones */
+@media (max-width:680px){
+  .title-main{font-size:28px}
+  .brand .logo{width:48px;height:48px}
+  .main-grid{grid-template-columns:1fr}
+  .cards-row{justify-content:center}
+  .card{width:92%;height:180px}
+  #grafica{height:240px}
+}
+
+/* small animation for loading feel */
+.fadeIn{animation:fadeIn .5s ease both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+<!-- HUD subtle svg lines (decorative) -->
+<div class="hud" aria-hidden="true">
+  <svg viewBox="0 0 1600 600" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#06e6d6"/><stop offset="1" stop-color="#7c3aed"/></linearGradient>
+    </defs>
+    <path d="M0 100 C 300 40, 900 10, 1600 80" stroke="url(#g1)" stroke-width="1.2" fill="none" opacity="0.08"></path>
+    <path d="M0 200 C 300 160, 900 190, 1600 130" stroke="url(#g1)" stroke-width="1.0" fill="none" opacity="0.06"></path>
+  </svg>
+</div>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header fadeIn" style="position:relative;z-index:2">
+    <div class="brand">
+      <div class="logo">CL</div>
+      <div class="title-wrap">
+        <div class="title-main title-drip"><span class="accent">CrediLine</span></div>
+        <div class="header-sub">Panel — Deudas · Proyecciones · Análisis</div>
+      </div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-weight:600;color:var(--muted)">Modo: Ultra Futurista</div>
+      <div style="color:var(--muted);font-size:12px">Color: turquesa + morado — Responsive</div>
+    </div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="main-grid" style="position:relative;z-index:2">
+
+    <!-- LEFT -->
+    <div class="left-col">
+      <!-- CARDS -->
+      <div class="cards-row fadeIn" id="cardsRow">
+        <!-- BBVA -->
+        <div class="card" data-id="bbva" tabindex="0" aria-label="BBVA">
+          <div class="inner">
+            <div class="visual"><img src="https://www.bbva.es/content/dam/public-web/bbvaes/images/personas/productos/02_tarjetas/cards/debito/2400x1600-tarjeta-debito-aqua.im1749567403128im.png?imwidth=1600" alt="BBVA"></div>
+            <div class="body">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div style="display:flex;gap:8px;align-items:center"><div class="chip">BB</div><div class="title">BBVA — Aqua</div></div>
+              </div>
+              <div class="meta"><span>Sin anualidad*</span><span class="meta-right">BBVA</span></div>
+            </div>
+            <div class="badge">BBVA</div>
+            <div class="desc">Tarjeta con seguridad dinámica — ideal para control desde app.</div>
+          </div>
+        </div>
+
+        <!-- NU -->
+        <div class="card" data-id="nu" tabindex="0" aria-label="NU">
+          <div class="inner">
+            <div class="visual"><img src="https://www.kardmatch.com.mx/uploads/tarjeta-de-credito-nu-grande.png" alt="NU"></div>
+            <div class="body">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div style="display:flex;gap:8px;align-items:center"><div class="chip">NU</div><div class="title">NU — Nubank</div></div>
+              </div>
+              <div class="meta"><span>App-first • Sin anualidad</span><span class="meta-right">NU</span></div>
+            </div>
+            <div class="badge">NU</div>
+            <div class="desc">Sencilla y práctica — control total en la app.</div>
+          </div>
+        </div>
+
+        <!-- STORI -->
+        <div class="card" data-id="stori" tabindex="0" aria-label="STORI">
+          <div class="inner">
+            <div class="visual"><img src="https://www.kardmatch.com.mx/uploads/tarjeta-storicard-grande.png" alt="STORI" style="object-position:center 30%"></div>
+            <div class="body">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div style="display:flex;gap:8px;align-items:center"><div class="chip">ST</div><div class="title">STORI — Score</div></div>
+              </div>
+              <div class="meta"><span>Anualidad reducida*</span><span class="meta-right">STORI</span></div>
+            </div>
+            <div class="badge">STORI</div>
+            <div class="desc">Pensada para crear o mejorar tu historial crediticio.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ACTIONS -->
+      <div style="display:flex;gap:12px;align-items:center;justify-content:center;margin-top:12px">
+        <button class="btn" id="btnDefaults">Cargar valores</button>
+        <button class="btn ghost" id="btnReset">Reset</button>
+      </div>
+
+      <!-- GRAPH -->
+      <canvas id="grafica" width="820" height="300" class="fadeIn"></canvas>
+
+      <!-- CHAT -->
+      <div class="chat">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px">
+          <h4 style="margin:0">Asistente Analítico</h4>
+          <div class="note">Comandos: "promedio", "tendencia", "predecir 6", "última"</div>
+        </div>
+
+        <div class="chat-log" id="chatLog" aria-live="polite">
+          <div class="msg bot-msg">Hola — selecciona una tarjeta, calcula y pregúntame. Puedo promediar, estimar tendencia y predecir.</div>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <input id="chatInput" class="input" placeholder="Escribe: ejemplo 'promedio' o 'predecir 6'">
+          <button class="btn" id="btnSend">Enviar</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: PANEL -->
+    <aside class="panel fadeIn" role="region" aria-label="Panel de control">
+      <h3 id="panelTitle">Control • Proyección</h3>
+      <p class="muted">Edita la ecuación <code>y = m·x + b</code>. Pulsa Calcular para graficar y guardar en historial local.</p>
+
+      <label class="label">Tarjeta seleccionada</label>
+      <input id="cardName" class="input" readonly placeholder="Ninguna">
+
+      <label class="label">Deuda actual (b)</label>
+      <input id="bVal" class="input" type="number" min="0" step="0.01" placeholder="Ej. 3500">
+
+      <label class="label">Pendiente / Interés mensual (m)</label>
+      <input id="mVal" class="input" type="number" min="0" step="0.0001" placeholder="Ej. 0.014">
+
+      <label class="label">Meses a proyectar (x)</label>
+      <input id="xVal" class="input" type="number" min="1" step="1" placeholder="Ej. 6">
+
+      <div style="display:flex;gap:10px;margin-top:8px">
+        <button class="btn" id="btnCalc">Calcular & Graficar</button>
+        <button class="btn ghost" id="btnHist">Historial</button>
+      </div>
+
+      <div id="result" style="margin-top:12px;font-weight:700;color:var(--turq)"></div>
+      <div id="histList" style="margin-top:12px;color:var(--muted);display:none"></div>
+
+      <div class="note" style="margin-top:18px">Historial guardado en <code>localStorage</code>. Compatible mobile.</div>
+    </aside>
+
+  </div><!-- main-grid -->
+
+</div><!-- container -->
+
+<script>
+/* ======================================================================
+   CREDILINE JS
+   - Parallax tilt on cards
+   - Graph via Chart.js
+   - Chatbot analytic: promedio, regresión simple, predicción
+   - Responsive behavior
+   ====================================================================== */
+
+/* ---------- state ---------- */
+const defaults = {
+  bbva: {name: 'BBVA — Aqua', m: 0.016, b: 12000},
+  nu:   {name: 'NU — Nubank', m: 0.00, b: 5000},
+  stori:{name: 'STORI — Stori', m: 0.014, b: 3500}
+};
+let selected = null;
+let history = [];
+
+/* load history */
+try{
+  const stored = localStorage.getItem('crediline_history_v1');
+  if(stored) history = JSON.parse(stored);
+}catch(e){ console.warn('local load fail'); }
+
+/* DOM refs */
+const cards = document.querySelectorAll('.card');
+const cardNameEl = document.getElementById('cardName');
+const bValEl = document.getElementById('bVal');
+const mValEl = document.getElementById('mVal');
+const xValEl = document.getElementById('xVal');
+const btnCalc = document.getElementById('btnCalc');
+const btnDefaults = document.getElementById('btnDefaults');
+const btnReset = document.getElementById('btnReset');
+const btnHist = document.getElementById('btnHist');
+const resultEl = document.getElementById('result');
+const histListEl = document.getElementById('histList');
+const chatInput = document.getElementById('chatInput');
+const chatLog = document.getElementById('chatLog');
+const btnSend = document.getElementById('btnSend');
+const grafCanvas = document.getElementById('grafica');
+
+let chart = null;
+
+/* ---------- utilities ---------- */
+function formatMoney(n){
+  return Number(n).toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function pushUser(msg){
+  const d = document.createElement('div'); d.className = 'msg user-msg'; d.innerText = msg; chatLog.appendChild(d); chatLog.scrollTop = chatLog.scrollHeight;
+}
+function pushBot(msg){
+  const d = document.createElement('div'); d.className = 'msg bot-msg'; d.innerText = msg; chatLog.appendChild(d); chatLog.scrollTop = chatLog.scrollHeight;
+}
+
+/* ---------- card tilt & selection ---------- */
+cards.forEach(card=>{
+  const inner = card.querySelector('.inner');
+  card.addEventListener('mousemove', e=>{
+    const r = card.getBoundingClientRect();
+    const cx = r.width / 2, cy = r.height / 2;
+    const dx = (e.clientX - r.left - cx) / cx;
+    const dy = (e.clientY - r.top - cy) / cy;
+    const rotY = dx * 10;
+    const rotX = -dy * 7;
+    inner.style.transform = `rotateY(${rotY}deg) rotateX(${rotX}deg) translateZ(6px)`;
+    const img = card.querySelector('img'); if(img) img.style.transform = `translateZ(12px) scale(1.03) translateY(${dy * -6}px)`;
+  });
+  card.addEventListener('mouseleave', ()=>{
+    const img = card.querySelector('img');
+    card.querySelector('.inner').style.transform = '';
+    if(img) img.style.transform = '';
+  });
+  card.addEventListener('click', ()=> selectCard(card.dataset.id));
+  card.addEventListener('keydown', e=>{ if(e.key === 'Enter') selectCard(card.dataset.id); });
+});
+
+function selectCard(id){
+  selected = id;
+  const d = defaults[id] || {name: id, m:0, b:0};
+  cardNameEl.value = d.name;
+  mValEl.value = d.m;
+  bValEl.value = d.b;
+  xValEl.value = 6;
+  resultEl.innerText = '';
+  histListEl.style.display = 'none';
+  highlightSelected();
+  pushBot('Tarjeta seleccionada: ' + d.name);
+}
+
+function highlightSelected(){
+  cards.forEach(c=>{
+    if(c.dataset.id === selected) c.style.transform = 'translateY(-8px) scale(1.02)';
+    else c.style.transform = '';
+  });
+}
+
+/* ---------- defaults & reset ---------- */
+btnDefaults.addEventListener('click', ()=>{
+  const id = selected || 'bbva';
+  selectCard(id);
+  pushBot('Cargados valores predeterminados para ' + (defaults[id].name || id));
+});
+
+btnReset.addEventListener('click', ()=>{
+  if(!confirm('Restablecer y borrar historial local?')) return;
+  history = [];
+  localStorage.removeItem('crediline_history_v1');
+  resultEl.innerText = '';
+  histListEl.style.display = 'none';
+  cardNameEl.value = '';
+  bValEl.value = ''; mValEl.value = ''; xValEl.value = '';
+  pushBot('Sistema restablecido.');
+});
+
+/* ---------- calculation & graph ---------- */
+btnCalc.addEventListener('click', ()=> {
+  const m = parseFloat(mValEl.value);
+  const b = parseFloat(bValEl.value);
+  const x = parseInt(xValEl.value, 10);
+  if(isNaN(m) || isNaN(b) || isNaN(x)){ pushBot('Completa m, b y x con valores válidos.'); return; }
+
+  // generate points 0..x
+  const pts = [];
+  for(let i=0;i<=x;i++){ const y = Math.round(((m * i) + b) * 100) / 100; pts.push({x:i,y}); }
+  const final = pts[pts.length - 1].y;
+  resultEl.innerText = `Proyección a ${x} meses: $${formatMoney(final)}`;
+
+  // save history
+  const rec = {ts: Date.now(), card:selected || 'manual', name: cardNameEl.value || '', m, b, x, y: final};
+  history.unshift(rec);
+  if(history.length > 60) history.pop();
+  try{ localStorage.setItem('crediline_history_v1', JSON.stringify(history)); }catch(e){console.warn('save fail');}
+
+  // graph
+  drawAnimatedLine(pts);
+
+  pushBot(`Proyección guardada: $${formatMoney(final)} (${x} meses).`);
+});
+
+/* ---------- drawAnimatedLine using Chart.js for polished look ---------- */
+function drawAnimatedLine(points){
+  const labels = points.map(p => p.x + 'm');
+  const data = points.map(p => p.y);
+
+  if(chart) chart.destroy();
+  chart = new Chart(grafCanvas.getContext('2d'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Proyección',
+        data,
+        borderWidth: 3,
+        tension: 0.35,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        borderColor: createGradient(grafCanvas.getContext('2d')),
+        backgroundColor: 'rgba(6,230,214,0.06)',
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { grid:{color:'rgba(255,255,255,0.02)'}, ticks:{color:'#cfeff6'} },
+        y: { grid:{color:'rgba(255,255,255,0.02)'}, ticks:{color:'#cfeff6'} }
+      },
+      plugins: { legend:{display:false}, tooltip:{mode:'index'} }
+    }
+  });
+
+  function createGradient(ctx){
+    const g = ctx.createLinearGradient(0,0,ctx.canvas.width,0);
+    g.addColorStop(0, 'rgba(6,230,214,0.95)');
+    g.addColorStop(1, 'rgba(124,58,237,0.95)');
+    return g;
+  }
+}
+
+/* ---------- history view ---------- */
+btnHist.addEventListener('click', ()=>{
+  if(history.length === 0){
+    histListEl.style.display = 'block';
+    histListEl.innerHTML = '<small>No hay historial aún. Calcula una proyección para guardar datos.</small>';
+    return;
+  }
+  histListEl.style.display = 'block';
+  histListEl.innerHTML = '<ul style="padding-left:16px;margin:8px 0 0 0;">' + history.map(h=>{
+    const d = new Date(h.ts);
+    return `<li style="margin-bottom:8px"><strong>${h.name || h.card}</strong> — $${formatMoney(h.y)} (${h.x}m) · <small style="color:#9fc9d7">${d.toLocaleString()}</small></li>`;
+  }).join('') + '</ul>';
+});
+
+/* ---------- chat handling & analytical functions ---------- */
+btnSend.addEventListener('click', handleChat);
+chatInput.addEventListener('keydown', e => { if(e.key === 'Enter') handleChat(); });
+
+function handleChat(){
+  const q = chatInput.value.trim();
+  if(!q) return;
+  pushUser(q);
+  chatInput.value = '';
+
+  setTimeout(()=>{
+    const qq = q.toLowerCase();
+
+    // "promedio"
+    if(qq.includes('promedio')){
+      if(history.length === 0){ pushBot('No hay datos para calcular promedio.'); return; }
+      const vals = history.map(h=>h.y);
+      const avg = vals.reduce((a,b)=>a+b,0)/vals.length;
+      pushBot(`Promedio (últimos ${vals.length}): $${formatMoney(avg)}.`);
+      return;
+    }
+
+    // "tendencia"
+    if(qq.includes('tendencia') || qq.includes('pendiente')){
+      if(history.length < 2){ pushBot('Se requieren al menos 2 proyecciones para estimar tendencia.'); return; }
+      const {slope, intercept} = regression(history);
+      const slopeTxt = slope >= 0 ? `subida ${slope.toFixed(4)}` : `bajada ${Math.abs(slope).toFixed(4)}`;
+      pushBot(`Tendencia: ${slopeTxt} unidades/mes (pendiente ≈ ${slope.toFixed(4)}).`);
+      return;
+    }
+
+    // "predecir N"
+    const match = qq.match(/predecir\s*(?:a\s*)?(\d+)/) || qq.match(/predict\s*(\d+)/);
+    if(match){
+      const months = parseInt(match[1],10);
+      if(!isNaN(months)){
+        // prefer using current m and b if provided
+        const mcur = parseFloat(mValEl.value);
+        const bcur = parseFloat(bValEl.value);
+        if(!isNaN(mcur) && !isNaN(bcur)){
+          const ypred = Math.round(((mcur * months) + bcur) * 100) / 100;
+          pushBot(`Usando (m,b) actuales -> en ${months} meses: $${formatMoney(ypred)}.`);
+          return;
+        } else if(history.length >= 2){
+          const {slope, intercept} = regression(history);
+          const ypred = slope * months + intercept;
+          pushBot(`Según historial -> en ${months} meses: $${formatMoney(ypred)} (pendiente ≈ ${slope.toFixed(4)}).`);
+          return;
+        } else {
+          pushBot('No hay datos suficientes ni (m,b) definidos para predecir. Ingresa m,b o crea proyecciones.');
+          return;
+        }
+      }
+    }
+
+    // "última" or "último"
+    if(qq.includes('últim') || qq.includes('last')){
+      if(history.length === 0){ pushBot('No hay proyecciones guardadas.'); return; }
+      const last = history[0];
+      pushBot(`Última: ${last.name || last.card} → $${formatMoney(last.y)} (${last.x} meses), ${new Date(last.ts).toLocaleString()}.`);
+      return;
+    }
+
+    // "consejo"
+    if(qq.includes('recomend') || qq.includes('consejo')){
+      // heuristic
+      let mcur = parseFloat(mValEl.value);
+      if(isNaN(mcur) && history.length >= 2){
+        mcur = regression(history).slope;
+      }
+      if(isNaN(mcur)){ pushBot('No hay suficiente información para una recomendación precisa.'); return; }
+      if(mcur > 1) pushBot('Pendiente muy alta: considera pagar más que el mínimo y negociar tasa.');
+      else if(mcur > 0.05) pushBot('Pendiente moderada: intenta pagos extra cuando puedas.');
+      else pushBot('Pendiente baja: mantén pagos regulares y revisa presupuesto.');
+      return;
+    }
+
+    // fallback
+    pushBot('Pruébame con comandos: "promedio", "tendencia", "predecir 6", "última", "recomendación".');
+  }, 420);
+}
+
+/* simple linear regression on history values: index -> y */
+function regression(data){
+  const series = data.slice(0, 30).map((h,i)=>({x:i+1,y:h.y}));
+  const n = series.length;
+  if(n===0) return {slope:0, intercept:0};
+  let sumX=0,sumY=0,sumXY=0,sumX2=0;
+  for(const p of series){ sumX+=p.x; sumY+=p.y; sumXY+=p.x*p.y; sumX2+=p.x*p.x; }
+  const denom = (n*sumX2 - sumX*sumX) || 1;
+  const slope = (n*sumXY - sumX*sumY) / denom;
+  const intercept = (sumY - slope*sumX) / n;
+  return {slope, intercept};
+}
+
+/* initial helper: draw empty instruction note */
+(function initCanvas(){
+  if(chart) chart.destroy();
+  const ctx = grafCanvas.getContext('2d');
+  ctx.clearRect(0,0,grafCanvas.width,grafCanvas.height);
+  ctx.fillStyle = 'rgba(255,255,255,0.06)';
+  ctx.font = '13px Inter';
+  ctx.fillText('Gráfica lista — calcula una proyección para visualizarla', 16, 24);
+  // adapt size on DPR
+  function resize(){ const ratio = window.devicePixelRatio||1; const cssW = grafCanvas.clientWidth||820; const cssH = grafCanvas.clientHeight||300; grafCanvas.width = Math.floor(cssW*ratio); grafCanvas.height = Math.floor(cssH*ratio); ctx.setTransform(ratio,0,0,ratio,0,0); }
+  window.addEventListener('resize', resize); resize();
+})();
+
+/* ensure keyboard accessible buttons */
+document.querySelectorAll('.btn, .card').forEach(el => { el.addEventListener('keydown', e => { if(e.key === 'Enter') el.click(); }); });
+
+/* finished */
+pushBot('CrediLine activo — selecciona una tarjeta para comenzar.');
+
+</script>
+</body>
+</html>
