@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CrediLine</title>
+
+<style>
+/* ---------------------------------------------------
+   PALETA FUTURISTA TURQUESA + MORADO
+--------------------------------------------------- */
+:root{
+  --bg:#0d1220;
+  --accent:#00f5ff;
+  --accent2:#b450ff;
+  --glass:rgba(255,255,255,0.06);
+  --glass2:rgba(255,255,255,0.04);
+  --border:rgba(255,255,255,0.10);
+  --txt:#dff8ff;
+  --grad:linear-gradient(135deg,#00f5ff 0%,#06b6d4 35%,#8b5cf6 100%);
+  color-scheme:dark;
+}
+
+html,body{
+  margin:0;
+  background:radial-gradient(circle at 20% 30%, #09101f 0%, #05070d 55%);
+  color:var(--txt);
+  font-family:"Inter",system-ui;
+  overflow-x:hidden;
+}
+
+
+/* ---------------------------------------------------
+   TITLE CREDILINE ESTILO PINTURA ESCURRIENDO
+--------------------------------------------------- */
+header{
+  padding:40px;
+  text-align:center;
+}
+
+.title{
+  font-size:58px;
+  font-weight:900;
+  letter-spacing:-2px;
+  background:var(--grad);
+  -webkit-background-clip:text;
+  color:transparent;
+  position:relative;
+  display:inline-block;
+  animation:glow 4s infinite alternate;
+}
+
+.title::after{
+  content:'';
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  bottom:-18px;
+  width:140px;
+  height:18px;
+  background:var(--grad);
+  filter:blur(14px);
+  border-radius:50%;
+}
+
+.drip{
+  width:12px;
+  height:28px;
+  background:var(--grad);
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  bottom:-45px;
+  border-radius:12px;
+  animation:drip 2s infinite ease-in-out;
+}
+
+@keyframes drip{
+  0%{height:0; opacity:0;}
+  30%{height:30px; opacity:1;}
+  100%{height:0; opacity:0;}
+}
+@keyframes glow{
+  from{filter:drop-shadow(0 0 4px #00f5ff);}
+  to{filter:drop-shadow(0 0 14px #b450ff);}
+}
+
+
+/* ---------------------------------------------------
+   LAYOUT
+--------------------------------------------------- */
+.wrap{
+  max-width:1400px;
+  padding:20px;
+  margin:auto;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr 420px;
+  gap:35px;
+}
+@media (max-width:980px){
+  .grid{
+    grid-template-columns:1fr;
+  }
+}
+
+
+/* ---------------------------------------------------
+   TARJETAS 3D
+--------------------------------------------------- */
+.cards{
+  display:flex;
+  gap:24px;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+
+.card-3d{
+  width:340px;
+  height:210px;
+  perspective:1500px;
+  position:relative;
+  cursor:pointer;
+}
+
+.card-inner{
+  width:100%;
+  height:100%;
+  background:var(--grad);
+  border-radius:20px;
+  padding:20px;
+  box-shadow:0 25px 50px rgba(0,0,0,0.55);
+  transition:transform .7s, box-shadow .4s;
+  transform-style:preserve-3d;
+}
+
+.card-3d:hover .card-inner{
+  transform:rotateY(12deg) rotateX(6deg) translateZ(10px);
+  box-shadow:0 35px 70px rgba(0,0,0,0.75);
+}
+
+.card-brand{
+  display:flex;
+  justify-content:space-between;
+}
+
+.chip{
+  width:48px;
+  height:36px;
+  background:rgba(255,255,255,0.25);
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+/* DESCRIPCIÓN EN HOVER */
+.desc{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(180deg, transparent 40%, rgba(0,0,0,.4));
+  opacity:0;
+  transition:.3s;
+  padding:20px;
+  border-radius:20px;
+  display:flex;
+  align-items:end;
+}
+.card-3d:hover .desc{
+  opacity:1;
+}
+
+
+/* ---------------------------------------------------
+   PANEL DE INFORMACIÓN DETALLADA
+--------------------------------------------------- */
+.details-panel{
+  background:var(--glass);
+  border:1px solid var(--border);
+  padding:25px;
+  border-radius:20px;
+  backdrop-filter:blur(10px);
+  display:none;
+  animation:fade .5s forwards;
+}
+@keyframes fade{
+  from{opacity:0; transform:translateY(10px);}
+  to{opacity:1; transform:translateY(0);}
+}
+
+.close-btn{
+  background:var(--accent);
+  padding:10px 18px;
+  border-radius:12px;
+  border:none;
+  font-weight:bold;
+  margin-top:10px;
+  cursor:pointer;
+}
+
+
+/* ---------------------------------------------------
+   CALCULADORA
+--------------------------------------------------- */
+.panel{
+  background:var(--glass2);
+  padding:25px;
+  border-radius:20px;
+  border:1px solid var(--border);
+  backdrop-filter:blur(8px);
+}
+
+input, select{
+  width:100%;
+  padding:12px;
+  margin-top:8px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid var(--border);
+  border-radius:10px;
+  color:var(--txt);
+}
+
+.btn{
+  background:var(--accent2);
+  padding:12px 20px;
+  border:none;
+  border-radius:12px;
+  color:#fff;
+  font-weight:bold;
+  margin-top:10px;
+  cursor:pointer;
+  transition:.2s;
+}
+.btn:hover{
+  transform:scale(1.05);
+}
+
+
+/* ---------------------------------------------------
+   CHATBOT
+--------------------------------------------------- */
+.chatbox{
+  margin-top:25px;
+  height:330px;
+  display:flex;
+  flex-direction:column;
+}
+
+.chat-log{
+  flex:1;
+  overflow:auto;
+  border-radius:12px;
+  padding:12px;
+  background:var(--glass2);
+  border:1px solid var(--border);
+}
+
+.msg{
+  padding:10px 14px;
+  border-radius:14px;
+  margin-bottom:8px;
+  max-width:80%;
+}
+
+.msg.user{
+  background:rgba(0,245,255,0.14);
+  border:1px solid rgba(0,245,255,0.28);
+  align-self:flex-end;
+}
+
+.msg.bot{
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.05);
+  align-self:flex-start;
+}
+
+.chat-input{
+  display:flex;
+  gap:10px;
+  margin-top:8px;
+}
+
+
+/* ---------------------------------------------------
+   RESPONSIVE MEGA CUIDADO
+--------------------------------------------------- */
+@media (max-width:560px){
+  .card-3d{
+    width:100%;
+    height:200px;
+  }
+  .title{
+    font-size:42px;
+  }
+}
+
+/* ---------------------------------------------------
+   FIN DEL CSS
+--------------------------------------------------- */
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title">CrediLine</div>
+  <div class="drip"></div>
+</header>
+
+
+<div class="wrap grid">
+
+  <!-- -------------------------------------
+       TARJETAS
+  ------------------------------------- -->
+  <div id="cards-section">
+    <div class="cards">
+
+      <!-- BBVA -->
+      <div class="card-3d" data-card="bbva">
+        <div class="card-inner">
+          <div class="card-brand">
+            <strong>BBVA</strong>
+            <div class="chip">¤</div>
+          </div>
+          <div class="card-number">•••• •••• •••• 5588</div>
+        </div>
+        <div class="desc">BBVA: anualidad $0, CAT 86%, liga a tu app.</div>
+      </div>
+
+      <!-- NU -->
+      <div class="card-3d" data-card="nu">
+        <div class="card-inner">
+          <div class="card-brand">
+            <strong>NU</strong>
+            <div class="chip">¤</div>
+          </div>
+          <div class="card-number">•••• •••• •••• 9931</div>
+        </div>
+        <div class="desc">NU: sin anualidad, CAT 70%, pagos flexibles.</div>
+      </div>
+
+      <!-- STORI -->
+      <div class="card-3d" data-card="stori">
+        <div class="card-inner">
+          <div class="card-brand">
+            <strong>STORI</strong>
+            <div class="chip">¤</div>
+          </div>
+          <div class="card-number">•••• •••• •••• 2221</div>
+        </div>
+        <div class="desc">STORI: $0 anualidad, CAT 95%, fácil aprobación.</div>
+      </div>
+
+    </div>
+  </div>
+
+
+
+  <!-- -------------------------------------
+       PANEL DETALLADO
+  ------------------------------------- -->
+  <div id="details" class="details-panel"></div>
+
+
+
+  <!-- -------------------------------------
+       CALCULADORA + COMPARADOR
+  ------------------------------------- -->
+  <div class="panel">
+    <h2>Calculadora de Deuda</h2>
+
+    <label>Monto de deuda</label>
+    <input id="monto" type="number" placeholder="Ej. 3000">
+
+    <label>Tasa % anual</label>
+    <input id="tasa" type="number" placeholder="Ej. 60">
+
+    <button class="btn" onclick="calcular()">Calcular pago mensual</button>
+
+    <div id="resultado" style="margin-top:10px;"></div>
+
+    <button class="btn" onclick="comparar()">Comparar con otras tarjetas</button>
+
+    <div id="comparacion" style="margin-top:15px;"></div>
+
+
+    <!-- -------------------------------------
+         CHATBOT
+    ------------------------------------- -->
+    <div class="chatbox">
+      <div class="chat-log" id="chat-log"></div>
+
+      <div class="chat-input">
+        <input id="chat-text" placeholder="Pregúntame algo...">
+        <button class="btn" onclick="sendMsg()">Enviar</button>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+
+
+
+<!-- ======================================================
+     SCRIPT COMPLETO
+====================================================== -->
+<script>
+/* ----------------------------------------------
+   DATOS DE TARJETAS
+---------------------------------------------- */
+const info = {
+  bbva:{
+    nombre:"BBVA",
+    cat:"86%",
+    anualidad:"$0",
+    beneficios:"Se integra a tu app, amplia aceptación, promociones.",
+    uso:"Ideal para compras recurrentes."
+  },
+  nu:{
+    nombre:"NU",
+    cat:"70%",
+    anualidad:"$0",
+    beneficios:"Pagos flexibles, app excelente, control total.",
+    uso:"Perfecta para jóvenes y manejo diario."
+  },
+  stori:{
+    nombre:"STORI",
+    cat:"95%",
+    anualidad:"$0",
+    beneficios:"Aprobación rápida, historial crediticio.",
+    uso:"Buena para iniciar historial."
+  }
+};
+
+
+/* ----------------------------------------------
+   MOSTRAR PANEL DETALLADO
+---------------------------------------------- */
+document.querySelectorAll(".card-3d").forEach(card=>{
+  card.addEventListener("click",()=>{
+    const key = card.dataset.card;
+    const d = info[key];
+
+    document.getElementById("cards-section").style.display="none";
+
+    document.getElementById("details").innerHTML = `
+      <h2>${d.nombre}</h2>
+      <p><strong>CAT:</strong> ${d.cat}</p>
+      <p><strong>Anualidad:</strong> ${d.anualidad}</p>
+      <p><strong>Beneficios:</strong> ${d.beneficios}</p>
+      <p><strong>Uso recomendado:</strong> ${d.uso}</p>
+
+      <button class="close-btn" onclick="cerrarDetalles()">Cerrar</button>
+    `;
+
+    document.getElementById("details").style.display="block";
+  });
+});
+
+function cerrarDetalles(){
+  document.getElementById("details").style.display="none";
+  document.getElementById("cards-section").style.display="block";
+}
+
+
+
+/* ----------------------------------------------
+   CALCULADORA DEUDA
+---------------------------------------------- */
+function calcular(){
+  const monto = parseFloat(monto.value);
+  const tasa = parseFloat(tasa.value)/100;
+
+  if(!monto || !tasa){
+    resultado.innerHTML = "Ingresa datos válidos.";
+    return;
+  }
+
+  const mensual = (monto * tasa) / 12;
+  resultado.innerHTML = `<strong>Pago mensual estimado: </strong>$${mensual.toFixed(2)}`;
+}
+
+
+/* ----------------------------------------------
+   OPCIÓN B – COMPARAR DEUDA
+---------------------------------------------- */
+function comparar(){
+  const monto = parseFloat(monto.value);
+  if(!monto){ comparacion.innerHTML="Ingresa primero el monto."; return;}
+
+  const tasas = {
+    BBVA:0.86,
+    NU:0.70,
+    STORI:0.95
+  };
+
+  let html = "<h3>Comparación de pago mensual</h3>";
+
+  for(let t in tasas){
+    let mensual = (monto * tasas[t]) / 12;
+    html += `<p><strong>${t}:</strong> $${mensual.toFixed(2)}</p>`;
+  }
+
+  comparacion.innerHTML = html;
+}
+
+
+
+/* ----------------------------------------------
+   CHATBOT SIMPLE CON ANÁLISIS
+---------------------------------------------- */
+function sendMsg(){
+  const text = chat-text.value;
+  if(text.trim()==="") return;
+
+  appendMsg(text,"user");
+
+  // Respuesta simple
+  let r = analizar(text);
+  setTimeout(()=>appendMsg(r,"bot"),600);
+
+  chat-text.value="";
+}
+
+function appendMsg(msg,type){
+  const div = document.createElement("div");
+  div.className = "msg " + type;
+  div.innerText = msg;
+  document.getElementById("chat-log").appendChild(div);
+
+  document.getElementById("chat-log").scrollTop = 999999;
+}
+
+function analizar(q){
+  q = q.toLowerCase();
+
+  if(q.includes("bbva")) return "BBVA tiene CAT de 86%, es estable y con buena app.";
+  if(q.includes("nu")) return "NU es ideal para manejar tu crédito con control total.";
+  if(q.includes("stori")) return "Stori es excelente para construir historial.";
+  if(q.includes("deuda")) return "Puedes usar nuestra calculadora para estimar pagos.";
+  if(q.includes("me conviene")) return "Depende: NU es flexible, BBVA es estable, Stori ayuda a iniciar historial.";
+
+  return "Interesante. Puedo ayudarte a comparar tarjetas o analizar tu deuda.";
+}
+</script>
+
+</body>
+</html>
