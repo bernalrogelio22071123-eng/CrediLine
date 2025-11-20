@@ -22,8 +22,8 @@
 :root{
   --bg1: #030510;
   --bg2: #071022;
-  --turq: #06e6d6;     /* turquoise accent */
-  --purple: #7c3aed;   /* purple accent */
+  --turq: #06e6d6;
+  --purple: #7c3aed;
   --glass: rgba(255,255,255,0.04);
   --glass-2: rgba(255,255,255,0.02);
   --muted: #9fc9d7;
@@ -130,7 +130,7 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,'Segoe 
 .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--text)}
 
 /* canvas */
-#grafica{width:100%;height:300px;border-radius:12px;margin-top:14px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.02));box-shadow:inset 0 4px 18px rgba(0,0,0,0.4)}
+#grafica{width:100%;height:300px;border-radius:12px;margin-top:14px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.02));box-shadow:inset 0 4px 18px rgba(0,0,0,0.4);}
 
 /* chat */
 .chat{margin-top:14px}
@@ -142,6 +142,22 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,'Segoe 
 
 /* footer small note */
 .note{margin-top:12px;color:var(--muted);font-size:13px;text-align:center}
+
+/* MODAL (gráfica como imagen) */
+.graph-modal-bg{
+  position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,23,0.6);z-index:9999;
+}
+.graph-modal{
+  width:calc(100% - 48px);
+  max-width:980px;
+  background:linear-gradient(180deg, rgba(6,19,26,0.92), rgba(4,8,12,0.96));
+  border-radius:12px;
+  padding:18px;
+  box-shadow:0 20px 50px rgba(2,6,23,0.8);
+  border:1px solid rgba(124,58,237,0.08);
+}
+.graph-modal .modal-controls{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+.graph-modal img{width:100%;height:auto;display:block;border-radius:8px;box-shadow:0 10px 30px rgba(6,230,214,0.04);}
 
 /* responsiveness for phones */
 @media (max-width:680px){
@@ -156,6 +172,13 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,'Segoe 
 /* small animation for loading feel */
 .fadeIn{animation:fadeIn .5s ease both}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .fadeIn{animation:none}
+  .card{transition:none}
+  .card .inner{transition:none}
+}
 </style>
 </head>
 <body>
@@ -194,9 +217,9 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,'Segoe 
     <!-- LEFT -->
     <div class="left-col">
       <!-- CARDS -->
-      <div class="cards-row fadeIn" id="cardsRow">
+      <div class="cards-row fadeIn" id="cardsRow" role="list">
         <!-- BBVA -->
-        <div class="card" data-id="bbva" tabindex="0" aria-label="BBVA">
+        <div class="card" data-id="bbva" tabindex="0" aria-label="BBVA" role="listitem" aria-pressed="false">
           <div class="inner">
             <div class="visual"><img src="https://www.bbva.es/content/dam/public-web/bbvaes/images/personas/productos/02_tarjetas/cards/debito/2400x1600-tarjeta-debito-aqua.im1749567403128im.png?imwidth=1600" alt="BBVA"></div>
             <div class="body">
@@ -211,7 +234,7 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,'Segoe 
         </div>
 
         <!-- NU -->
-        <div class="card" data-id="nu" tabindex="0" aria-label="NU">
+        <div class="card" data-id="nu" tabindex="0" aria-label="NU" role="listitem" aria-pressed="false">
           <div class="inner">
             <div class="visual"><img src="https://www.kardmatch.com.mx/uploads/tarjeta-de-credito-nu-grande.png" alt="NU"></div>
             <div class="body">
@@ -226,7 +249,7 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,'Segoe 
         </div>
 
         <!-- STORI -->
-        <div class="card" data-id="stori" tabindex="0" aria-label="STORI">
+        <div class="card" data-id="stori" tabindex="0" aria-label="STORI" role="listitem" aria-pressed="false">
           <div class="inner">
             <div class="visual"><img src="https://www.kardmatch.com.mx/uploads/tarjeta-storicard-grande.png" alt="STORI" style="object-position:center 30%"></div>
             <div class="body">
@@ -248,8 +271,19 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,'Segoe 
         <button class="btn ghost" id="btnReset">Reset</button>
       </div>
 
-      <!-- GRAPH -->
-      <canvas id="grafica" width="820" height="300" class="fadeIn"></canvas>
+      <!-- GRAPH (oculto en layout, la gráfica se mostrará como imagen en modal) -->
+      <canvas id="grafica" width="820" height="300" class="fadeIn" role="img" aria-label="Gráfica de proyección" style="display:none"></canvas>
+
+      <!-- Modal para imagen de gráfica -->
+      <div id="graphModalBg" class="graph-modal-bg" aria-hidden="true">
+        <div class="graph-modal" role="dialog" aria-modal="true" aria-label="Gráfica proyectada">
+          <img id="graphImg" alt="Gráfica de proyección">
+          <div class="modal-controls">
+            <button class="btn" id="downloadGraphBtn">Descargar</button>
+            <button class="btn ghost" id="closeGraphBtn">Cerrar</button>
+          </div>
+        </div>
+      </div>
 
       <!-- CHAT -->
       <div class="chat">
@@ -288,11 +322,15 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,'Segoe 
       <input id="xVal" class="input" type="number" min="1" step="1" placeholder="Ej. 6">
 
       <div style="display:flex;gap:10px;margin-top:8px">
-        <button class="btn" id="btnCalc">Calcular & Graficar</button>
+        <!-- Botón CALCULAR (ahora solo calcula y guarda) -->
+        <button class="btn" id="btnCalc">Calcular</button>
+        <!-- Nuevo botón GRAFICAR: genera la imagen y abre modal -->
+        <button class="btn" id="btnShowGraph">Graficar</button>
+
         <button class="btn ghost" id="btnHist">Historial</button>
       </div>
 
-      <div id="result" style="margin-top:12px;font-weight:700;color:var(--turq)"></div>
+      <div id="result" style="margin-top:12px;font-weight:700;color:var(--turq)" role="status" aria-live="polite"></div>
       <div id="histList" style="margin-top:12px;color:var(--muted);display:none"></div>
 
       <div class="note" style="margin-top:18px">Historial guardado en <code>localStorage</code>. Compatible mobile.</div>
@@ -304,11 +342,10 @@ html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,'Segoe 
 
 <script>
 /* ======================================================================
-   CREDILINE JS
-   - Parallax tilt on cards
-   - Graph via Chart.js
-   - Chatbot analytic: promedio, regresión simple, predicción
-   - Responsive behavior
+   CREDILINE JS modificado para:
+   - dejar el botón "Calcular" solo
+   - agregar botón "Graficar" que muestra la gráfica como imagen en modal
+   - mantener todo lo demás exactamente como estaba
    ====================================================================== */
 
 /* ---------- state ---------- */
@@ -319,6 +356,7 @@ const defaults = {
 };
 let selected = null;
 let history = [];
+let lastPoints = []; // <-- puntos de la última proyección (usados por el modal)
 
 /* load history */
 try{
@@ -333,6 +371,7 @@ const bValEl = document.getElementById('bVal');
 const mValEl = document.getElementById('mVal');
 const xValEl = document.getElementById('xVal');
 const btnCalc = document.getElementById('btnCalc');
+const btnShowGraph = document.getElementById('btnShowGraph');
 const btnDefaults = document.getElementById('btnDefaults');
 const btnReset = document.getElementById('btnReset');
 const btnHist = document.getElementById('btnHist');
@@ -343,6 +382,11 @@ const chatLog = document.getElementById('chatLog');
 const btnSend = document.getElementById('btnSend');
 const grafCanvas = document.getElementById('grafica');
 
+const graphModalBg = document.getElementById('graphModalBg');
+const graphImg = document.getElementById('graphImg');
+const closeGraphBtn = document.getElementById('closeGraphBtn');
+const downloadGraphBtn = document.getElementById('downloadGraphBtn');
+
 let chart = null;
 
 /* ---------- utilities ---------- */
@@ -350,30 +394,31 @@ function formatMoney(n){
   return Number(n).toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2});
 }
 function pushUser(msg){
-  const d = document.createElement('div'); d.className = 'msg user-msg'; d.innerText = msg; chatLog.appendChild(d); chatLog.scrollTop = chatLog.scrollHeight;
+  const d = document.createElement('div'); d.className = 'msg user'; d.innerText = msg; chatLog.appendChild(d); chatLog.scrollTop = chatLog.scrollHeight;
 }
 function pushBot(msg){
-  const d = document.createElement('div'); d.className = 'msg bot-msg'; d.innerText = msg; chatLog.appendChild(d); chatLog.scrollTop = chatLog.scrollHeight;
+  const d = document.createElement('div'); d.className = 'msg bot'; d.innerText = msg; chatLog.appendChild(d); chatLog.scrollTop = chatLog.scrollHeight;
 }
+function isFiniteNumber(v){ return Number.isFinite(v) && !Number.isNaN(v); }
 
-/* ---------- card tilt & selection ---------- */
+/* ---------- card tilt & selection (touch-safe) ---------- */
+const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
 cards.forEach(card=>{
   const inner = card.querySelector('.inner');
-  card.addEventListener('mousemove', e=>{
-    const r = card.getBoundingClientRect();
-    const cx = r.width / 2, cy = r.height / 2;
-    const dx = (e.clientX - r.left - cx) / cx;
-    const dy = (e.clientY - r.top - cy) / cy;
-    const rotY = dx * 10;
-    const rotX = -dy * 7;
-    inner.style.transform = `rotateY(${rotY}deg) rotateX(${rotX}deg) translateZ(6px)`;
-    const img = card.querySelector('img'); if(img) img.style.transform = `translateZ(12px) scale(1.03) translateY(${dy * -6}px)`;
-  });
-  card.addEventListener('mouseleave', ()=>{
-    const img = card.querySelector('img');
-    card.querySelector('.inner').style.transform = '';
-    if(img) img.style.transform = '';
-  });
+  // disable tilt on touch devices for performance/UX
+  if(!isTouch){
+    card.addEventListener('mousemove', e=>{
+      const r = card.getBoundingClientRect();
+      const cx = r.width / 2, cy = r.height / 2;
+      const dx = (e.clientX - r.left - cx) / cx;
+      const dy = (e.clientY - r.top - cy) / cy;
+      const rotY = dx * 10;
+      const rotX = -dy * 7;
+      inner.style.transform = `rotateY(${rotY}deg) rotateX(${rotX}deg) translateZ(6px)`;
+      const img = card.querySelector('img'); if(img) img.style.transform = `translateZ(12px) scale(1.03) translateY(${dy * -6}px)`;
+    });
+    card.addEventListener('mouseleave', ()=>{ const img = card.querySelector('img'); card.querySelector('.inner').style.transform = ''; if(img) img.style.transform = ''; });
+  }
   card.addEventListener('click', ()=> selectCard(card.dataset.id));
   card.addEventListener('keydown', e=>{ if(e.key === 'Enter') selectCard(card.dataset.id); });
 });
@@ -393,8 +438,8 @@ function selectCard(id){
 
 function highlightSelected(){
   cards.forEach(c=>{
-    if(c.dataset.id === selected) c.style.transform = 'translateY(-8px) scale(1.02)';
-    else c.style.transform = '';
+    if(c.dataset.id === selected) { c.style.transform = 'translateY(-8px) scale(1.02)'; c.setAttribute('aria-pressed','true'); }
+    else { c.style.transform = ''; c.setAttribute('aria-pressed','false'); }
   });
 }
 
@@ -408,24 +453,44 @@ btnDefaults.addEventListener('click', ()=>{
 btnReset.addEventListener('click', ()=>{
   if(!confirm('Restablecer y borrar historial local?')) return;
   history = [];
-  localStorage.removeItem('crediline_history_v1');
+  try{ localStorage.removeItem('crediline_history_v1'); }catch(e){/*ignore*/}
   resultEl.innerText = '';
   histListEl.style.display = 'none';
   cardNameEl.value = '';
   bValEl.value = ''; mValEl.value = ''; xValEl.value = '';
+  // destroy chart if exists
+  if(chart){ try{ chart.destroy(); }catch(e){ /* ignore */ } chart = null; }
+  lastPoints = [];
   pushBot('Sistema restablecido.');
 });
 
-/* ---------- calculation & graph ---------- */
+/* ---------- calculation (ahora SOLO calcula y guarda) ---------- */
 btnCalc.addEventListener('click', ()=> {
   const m = parseFloat(mValEl.value);
   const b = parseFloat(bValEl.value);
-  const x = parseInt(xValEl.value, 10);
-  if(isNaN(m) || isNaN(b) || isNaN(x)){ pushBot('Completa m, b y x con valores válidos.'); return; }
+  let x = parseInt(xValEl.value, 10);
 
-  // generate points 0..x
+  if(!isFiniteNumber(m) || !isFiniteNumber(b) || !Number.isInteger(x)){
+    pushBot('Completa m, b y x con valores válidos.'); return; }
+
+  // protect against absurd x (very large) — limit to 120 meses
+  const MAX_MONTHS = 120;
+  if(x > MAX_MONTHS){
+    pushBot(`El valor de meses se ha limitado a ${MAX_MONTHS} para mantener la gráfica estable.`);
+    x = MAX_MONTHS;
+    xValEl.value = MAX_MONTHS;
+  }
+
+  // generate points 0..x and store in lastPoints
   const pts = [];
-  for(let i=0;i<=x;i++){ const y = Math.round(((m * i) + b) * 100) / 100; pts.push({x:i,y}); }
+  for(let i=0;i<=x;i++){
+    // guard against large numeric overflows
+    const raw = (m * i) + b;
+    const y = Math.round(raw * 100) / 100;
+    pts.push({x:i,y});
+  }
+  lastPoints = pts.slice(); // guardar para usar en modal
+
   const final = pts[pts.length - 1].y;
   resultEl.innerText = `Proyección a ${x} meses: $${formatMoney(final)}`;
 
@@ -435,19 +500,38 @@ btnCalc.addEventListener('click', ()=> {
   if(history.length > 60) history.pop();
   try{ localStorage.setItem('crediline_history_v1', JSON.stringify(history)); }catch(e){console.warn('save fail');}
 
-  // graph
-  drawAnimatedLine(pts);
-
+  // NO dibujamos en layout (grafica oculta). Solo guardamos puntos.
   pushBot(`Proyección guardada: $${formatMoney(final)} (${x} meses).`);
 });
 
-/* ---------- drawAnimatedLine using Chart.js for polished look ---------- */
-function drawAnimatedLine(points){
+/* ---------- Compatibilidad Chart.js (registro defensivo) ---------- */
+try {
+  if (typeof Chart !== 'undefined' && Chart && Chart.hasOwnProperty('register') && Chart.registerables) {
+    Chart.register(...Chart.registerables);
+  }
+} catch (e) {
+  console.warn('Chart.js register fallback:', e);
+}
+
+/* ---------- Función que renderiza una gráfica en canvas oculto y devuelve dataURL ---------- */
+function renderChartToDataURL(points, options = {}) {
+  // crear canvas temporal (no insertarlo en DOM)
+  const tmpCanvas = document.createElement('canvas');
+  const dpr = window.devicePixelRatio || 1;
+  const cssWidth = Math.min(960, window.innerWidth - 80);
+  const cssHeight = Math.round(cssWidth * 0.55);
+  tmpCanvas.width = Math.floor(cssWidth * dpr);
+  tmpCanvas.height = Math.floor(cssHeight * dpr);
+  tmpCanvas.style.width = cssWidth + 'px';
+  tmpCanvas.style.height = cssHeight + 'px';
+  const ctx = tmpCanvas.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+
   const labels = points.map(p => p.x + 'm');
   const data = points.map(p => p.y);
 
-  if(chart) chart.destroy();
-  chart = new Chart(grafCanvas.getContext('2d'), {
+  // crear chart local (no afecta al chart global)
+  const tmpChart = new Chart(ctx, {
     type: 'line',
     data: {
       labels,
@@ -458,28 +542,167 @@ function drawAnimatedLine(points){
         tension: 0.35,
         pointRadius: 4,
         pointHoverRadius: 6,
-        borderColor: createGradient(grafCanvas.getContext('2d')),
+        borderColor: function() {
+          // gradiente simple: usar dos colores
+          return 'rgba(6,230,214,0.95)';
+        }(),
         backgroundColor: 'rgba(6,230,214,0.06)',
-        fill: true
+        fill: true,
+        cubicInterpolationMode: 'monotone'
+      }]
+    },
+    options: {
+      responsive: false,
+      animation: false,
+      scales: {
+        x: {
+          grid:{color:'rgba(255,255,255,0.02)'},
+          ticks:{color:'#cfeff6', maxRotation: 0, autoSkip: true, maxTicksLimit: 12}
+        },
+        y: {
+          grid:{color:'rgba(255,255,255,0.02)'},
+          ticks:{color:'#cfeff6'}
+        }
+      },
+      plugins: {
+        legend:{display:false},
+        tooltip:{enabled:false}
+      }
+    }
+  });
+
+  // forzar render y obtener dataURL
+  // devolvemos Promise para esperar destrucción del chart temporal
+  return new Promise((resolve) => {
+    // dar un tick para asegurarnos que Chart.js haya renderizado
+    setTimeout(() => {
+      try {
+        const dataUrl = tmpCanvas.toDataURL('image/png');
+        // destruir chart temporal para liberar memoria
+        try{ tmpChart.destroy(); }catch(e){}
+        resolve(dataUrl);
+      } catch (e) {
+        try{ tmpChart.destroy(); }catch(e){}
+        resolve(null);
+      }
+    }, 60);
+  });
+}
+
+/* ---------- Mostrar modal con imagen generada ---------- */
+btnShowGraph.addEventListener('click', async () => {
+  if(!lastPoints || lastPoints.length === 0){
+    pushBot('Primero calcula una proyección (usa Calcular) antes de graficar.');
+    return;
+  }
+
+  // generar imagen desde puntos
+  const dataUrl = await renderChartToDataURL(lastPoints);
+  if(!dataUrl){
+    pushBot('No se pudo generar la gráfica. Intenta de nuevo.');
+    return;
+  }
+
+  graphImg.src = dataUrl;
+  graphModalBg.style.display = 'flex';
+  graphModalBg.setAttribute('aria-hidden','false');
+
+  // preparar botón descargar
+  downloadGraphBtn.onclick = () => {
+    const a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = `proyeccion_${(new Date()).toISOString().slice(0,19).replace(/[:T]/g,'-')}.png`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  };
+});
+
+/* cerrar modal */
+closeGraphBtn.addEventListener('click', () => {
+  graphModalBg.style.display = 'none';
+  graphModalBg.setAttribute('aria-hidden','true');
+  graphImg.src = '';
+});
+
+/* cerrar modal con fondo clic (fuera del contenido) */
+graphModalBg.addEventListener('click', (e) => {
+  if(e.target === graphModalBg){
+    graphModalBg.style.display = 'none';
+    graphModalBg.setAttribute('aria-hidden','true');
+    graphImg.src = '';
+  }
+});
+
+/* ---------- drawAnimatedLine (mantenida por compatibilidad, usa grafCanvas que está oculto) ---------- */
+function drawAnimatedLine(points, options = {}) {
+  // labels & data
+  const labels = points.map(p => p.x + 'm');
+  const data = points.map(p => p.y);
+
+  // destroy old chart if exists (prevents overlay bug)
+  if(chart){ try{ chart.destroy(); }catch(e){ /* ignore */ } chart = null; }
+
+  // compute sensible Y axis max (avoid auto-scaling that explodes)
+  const maxData = Math.max(...data.map(v=>isFinite(v)?v:0), 0);
+  const minData = Math.min(...data.map(v=>isFinite(v)?v:0), 0);
+  let suggestedMax = Math.max(maxData * 1.12, maxData + 50, 100);
+  let suggestedMin = Math.min(minData * 0.96, minData - 50, 0);
+  if(suggestedMin === suggestedMax){ suggestedMax = suggestedMax + 1; suggestedMin = Math.max(0, suggestedMin - 1); }
+
+  const ctx = grafCanvas.getContext('2d');
+
+  function createGradient(){
+    const dpr = window.devicePixelRatio || 1;
+    const width = ctx.canvas.width / dpr;
+    const g = ctx.createLinearGradient(0,0,width,0);
+    g.addColorStop(0, 'rgba(6,230,214,0.95)');
+    g.addColorStop(1, 'rgba(124,58,237,0.95)');
+    return g;
+  }
+
+  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Proyección',
+        data,
+        borderWidth: 3,
+        tension: 0.35,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        borderColor: createGradient(),
+        backgroundColor: 'rgba(6,230,214,0.06)',
+        fill: true,
+        cubicInterpolationMode: 'monotone'
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      animation: reduceMotion ? false : { duration: 600 },
       scales: {
-        x: { grid:{color:'rgba(255,255,255,0.02)'}, ticks:{color:'#cfeff6'} },
-        y: { grid:{color:'rgba(255,255,255,0.02)'}, ticks:{color:'#cfeff6'} }
+        x: {
+          grid:{color:'rgba(255,255,255,0.02)'},
+          ticks:{color:'#cfeff6', maxRotation: 0, autoSkip: true, maxTicksLimit: 12}
+        },
+        y: {
+          grid:{color:'rgba(255,255,255,0.02)'},
+          ticks:{color:'#cfeff6'},
+          beginAtZero: suggestedMin >= 0,
+          suggestedMin,
+          suggestedMax
+        }
       },
-      plugins: { legend:{display:false}, tooltip:{mode:'index'} }
+      plugins: {
+        legend:{display:false},
+        tooltip:{mode:'index', intersect:false}
+      }
     }
   });
-
-  function createGradient(ctx){
-    const g = ctx.createLinearGradient(0,0,ctx.canvas.width,0);
-    g.addColorStop(0, 'rgba(6,230,214,0.95)');
-    g.addColorStop(1, 'rgba(124,58,237,0.95)');
-    return g;
-  }
 }
 
 /* ---------- history view ---------- */
@@ -490,9 +713,9 @@ btnHist.addEventListener('click', ()=>{
     return;
   }
   histListEl.style.display = 'block';
-  histListEl.innerHTML = '<ul style="padding-left:16px;margin:8px 0 0 0;">' + history.map(h=>{
+  histListEl.innerHTML = '<ul style="padding-left:16px;margin:8px 0 0 0;" role="list">' + history.map(h=>{
     const d = new Date(h.ts);
-    return `<li style="margin-bottom:8px"><strong>${h.name || h.card}</strong> — $${formatMoney(h.y)} (${h.x}m) · <small style="color:#9fc9d7">${d.toLocaleString()}</small></li>`;
+    return `<li style="margin-bottom:8px" role="listitem"><strong>${h.name || h.card}</strong> — $${formatMoney(h.y)} (${h.x}m) · <small style="color:#9fc9d7">${d.toLocaleString()}</small></li>`;
   }).join('') + '</ul>';
 });
 
@@ -591,17 +814,36 @@ function regression(data){
   return {slope, intercept};
 }
 
-/* initial helper: draw empty instruction note */
+/* ---------- initCanvas with DPR-aware sizing and debounce (mantener para compatibilidad) ---------- */
 (function initCanvas(){
-  if(chart) chart.destroy();
+  if(chart) chart.destroy(); chart = null;
   const ctx = grafCanvas.getContext('2d');
   ctx.clearRect(0,0,grafCanvas.width,grafCanvas.height);
   ctx.fillStyle = 'rgba(255,255,255,0.06)';
   ctx.font = '13px Inter';
   ctx.fillText('Gráfica lista — calcula una proyección para visualizarla', 16, 24);
-  // adapt size on DPR
-  function resize(){ const ratio = window.devicePixelRatio||1; const cssW = grafCanvas.clientWidth||820; const cssH = grafCanvas.clientHeight||300; grafCanvas.width = Math.floor(cssW*ratio); grafCanvas.height = Math.floor(cssH*ratio); ctx.setTransform(ratio,0,0,ratio,0,0); }
-  window.addEventListener('resize', resize); resize();
+
+  let resizeDebounceTimer = null;
+  function resize(){ 
+    const ratio = window.devicePixelRatio||1; 
+    const cssW = grafCanvas.clientWidth||820; 
+    const cssH = grafCanvas.clientHeight||300; 
+    const newW = Math.floor(cssW*ratio); 
+    const newH = Math.floor(cssH*ratio); 
+    if(grafCanvas.width === newW && grafCanvas.height === newH) return;
+    grafCanvas.width = newW; 
+    grafCanvas.height = newH; 
+    ctx.setTransform(ratio,0,0,ratio,0,0); 
+    if(chart && typeof chart.resize === 'function') { try{ chart.resize(); chart.update(); }catch(e){} }
+    else { ctx.clearRect(0,0,grafCanvas.width,grafCanvas.height); ctx.fillStyle = 'rgba(255,255,255,0.06)'; ctx.font = '13px Inter'; ctx.fillText('Gráfica lista — calcula una proyección para visualizarla', 16, 24); }
+  }
+
+  function debounced(){ if(resizeDebounceTimer) clearTimeout(resizeDebounceTimer); resizeDebounceTimer = setTimeout(resize, 160); }
+  window.addEventListener('resize', debounced);
+  // initial call
+  resize();
+  // cleanup
+  window.addEventListener('beforeunload', ()=>{ if(chart){ try{ chart.destroy(); }catch(e){} chart = null; } window.removeEventListener('resize', debounced); });
 })();
 
 /* ensure keyboard accessible buttons */
